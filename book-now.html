@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Now - Luxury Stay Hotel</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Search dropdown styles */
+        #suggestions {
+            border: 1px solid #ccc;
+            max-height: 200px;
+            overflow-y: auto;
+            position: absolute;
+            background-color: white;
+            width: 100%;
+            display: none;
+            z-index: 100;
+        }
+        .suggestion-item {
+            padding: 10px;
+            cursor: pointer;
+        }
+        .suggestion-item:hover {
+            background-color: #f0f0f0;
+        }
+        #payment-details {
+            display: none;
+        }
+        .booking-form {
+            max-width: 600px;
+            margin: 30px auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .booking-form h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 15px;
+        }
+        #total-price {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 18px;
+            color: #2196f3;
+        }
+        .book-now-button {
+            background-color: #2196f3;
+            color: #fff;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+        .book-now-button:hover {
+            background-color: #1769aa;
+        }
+        header {
+            background-color: #4a90e2;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Section -->
+    <header>
+        <h1>Book Your Stay at Luxury Stay Hotel</h1>
+    </header>
+
+    <!-- Main Booking Form Section -->
+    <main>
+        <section class="booking-form">
+            <h2>Reserve a Room</h2>
+
+            <form id="booking-form" onsubmit="handleBooking(event)">
+
+                <!-- Search and Filter Section -->
+                <div class="form-group search-container" style="position: relative;">
+                    <label for="search-bar">Search Hotels:</label>
+                    <input type="text" id="search-bar" placeholder="Search for hotels..." onkeyup="searchHotels()" autocomplete="off">
+                    <div id="suggestions"></div>
+                </div>
+
+                <!-- Guest Name -->
+                <div class="form-group">
+                    <label for="guest-name">Full Name:</label>
+                    <input type="text" id="guest-name" name="guest_name" placeholder="Enter your full name" required>
+                </div>
+
+                <!-- Email Field (needed for confirmation) -->
+                <div class="form-group">
+                    <label for="email">Email Address:</label>
+                    <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                </div>
+
+                <!-- Room Type Selection -->
+                <div class="form-group">
+                    <label for="room-type">Room Type:</label>
+                    <select id="room-type" name="room_type" required onchange="updatePrice()">
+                        <option value="" disabled selected>Select Room Type</option>
+                        <option value="deluxe" data-price="150">Deluxe Room - $150/night</option>
+                        <option value="executive" data-price="250">Executive Suite - $250/night</option>
+                        <option value="family" data-price="300">Family Suite - $300/night</option>
+                        <option value="presidential" data-price="500">Presidential Suite - $500/night</option>
+                        <option value="honeymoon" data-price="350">Honeymoon Suite - $350/night</option>
+                        <option value="skyline" data-price="400">Skyline Suite - $400/night</option>
+                        <option value="penthouse" data-price="600">Penthouse Suite - $600/night</option>
+                    </select>
+                </div>
+
+                <!-- Check-in/Check-out Dates -->
+                <div class="form-group">
+                    <label for="check-in">Check-in Date:</label>
+                    <input type="date" id="check-in" name="check_in_date" required onchange="updatePrice()">
+                </div>
+
+                <div class="form-group">
+                    <label for="check-out">Check-out Date:</label>
+                    <input type="date" id="check-out" name="check_out_date" required onchange="updatePrice()">
+                </div>
+
+                <!-- Number of Guests -->
+                <div class="form-group">
+                    <label for="guests">Number of Guests:</label>
+                    <input type="number" id="guests" name="number_of_guests" min="1" max="10" required onchange="updatePrice()">
+                </div>
+
+                <!-- Total Price -->
+                <div id="total-price">Total Price: $0</div>
+
+                <!-- Payment Options -->
+                <h3>Payment Method</h3>
+                <div class="form-group">
+                    <label><input type="radio" name="payment_method" value="credit_card" required onclick="togglePaymentFields()"> Credit Card</label>
+                    <label><input type="radio" name="payment_method" value="debit_card" onclick="togglePaymentFields()"> Debit Card</label>
+                    <label><input type="radio" name="payment_method" value="paypal" onclick="togglePaymentFields()"> PayPal</label>
+                    <label><input type="radio" name="payment_method" value="net_banking" onclick="togglePaymentFields()"> Net Banking</label>
+                </div>
+
+                <!-- Payment Details (shown for card payments) -->
+                <div id="payment-details">
+                    <div class="form-group">
+                        <label for="card-number">Card Number:</label>
+                        <input type="text" id="card-number" name="card_number" maxlength="16" placeholder="Enter your 16-digit card number">
+                    </div>
+                    <div class="form-group">
+                        <label for="expiry-date">Expiry Date:</label>
+                        <input type="month" id="expiry-date" name="expiry_date">
+                    </div>
+                    <div class="form-group">
+                        <label for="cvv">CVV:</label>
+                        <input type="text" id="cvv" name="cvv" maxlength="3" placeholder="Enter CVV">
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="form-group">
+                    <button type="submit" class="book-now-button">Book Now</button>
+                </div>
+
+            </form>
+        </section>
+    </main>
+
+    <!---FOOTER SECTION--->
+    <div class="footer">
+       <div class="container">
+          <div class="footer-sect">
+             <img class="footer-logo" src="logo1.jpg" alt="Hotel Logo">
+          </div>
+          <div class="footer-sect">
+             <address> Luxury Stay Hotel, 123 Beach Avenue, Pune, Maharashtra 411017. </address>
+          </div>
+          <div class="footer-sect">
+             <img src="tel.png" alt="Phone Icon"> +91 - 020 6791 9444
+          </div>
+          <div class="footer-sect">
+             <img src="mail.png" alt="Mail Icon"> info@luxurystayhotel.com
+          </div>
+          <div class="footer-sect">
+             <img src="fb.png" alt="Facebook Icon">
+             <img src="tw.png" alt="Twitter Icon">
+             <img src="in.png" alt="Instagram Icon">
+             <img src="li.png" alt="LinkedIn Icon">
+          </div>
+          <div class="footer-sect">
+             <a href="index.html"> Home</a>
+             <a href="rooms-suites.html"> Rooms &amp; Suites </a>
+             <a href="book-now.html"> Book Now</a>
+             <a href="gallery.html"> Gallery</a>
+             <a href="contact.html"> Contact Us</a>
+          </div>
+       </div>
+    </div>
+    <!---------- Footer Copyright --------->
+    <div class="width-100 footer2-bacbor">
+       <p class="footer2-content">Copyright &copy; 2024, luxurystayhotel.com. All Rights Reserved</p>
+    </div>
+
+    <script>
+        var hotelList = [
+            "Luxury Beachfront Hotel in Miami",
+            "City Center Grand Hotel in New York",
+            "Mountain View Resort in Aspen",
+            "Oceanfront Boutique Hotel in California",
+            "Luxury Retreat at Fernie",
+            "Downtown Luxury Hotel in Toronto",
+            "Beachside Resort in Honolulu",
+            "Urban Oasis in Chicago",
+            "Exclusive Retreat in Vancouver",
+            "Desert Mirage Resort in Scottsdale"
+        ];
+
+        function searchHotels() {
+            var query = document.getElementById("search-bar").value.toLowerCase();
+            if (!query) {
+                document.getElementById("suggestions").style.display = "none";
+                return;
+            }
+            var filteredHotels = hotelList.filter(function(hotel) {
+                return hotel.toLowerCase().includes(query);
+            });
+            displaySuggestions(filteredHotels);
+        }
+
+        function displaySuggestions(hotels) {
+            var suggestionsContainer = document.getElementById("suggestions");
+            suggestionsContainer.innerHTML = "";
+
+            if (hotels.length > 0) {
+                suggestionsContainer.style.display = "block";
+                hotels.forEach(function(hotel) {
+                    var div = document.createElement("div");
+                    div.classList.add("suggestion-item");
+                    div.textContent = hotel;
+                    div.onclick = function() {
+                        document.getElementById("search-bar").value = hotel;
+                        suggestionsContainer.style.display = "none";
+                    };
+                    suggestionsContainer.appendChild(div);
+                });
+            } else {
+                suggestionsContainer.style.display = "none";
+            }
+        }
+
+        // Close suggestions when clicking outside
+        document.addEventListener("click", function(e) {
+            if (!e.target.matches("#search-bar")) {
+                document.getElementById("suggestions").style.display = "none";
+            }
+        });
+
+        function updatePrice() {
+            var checkIn = document.getElementById("check-in").value;
+            var checkOut = document.getElementById("check-out").value;
+            var roomSelect = document.getElementById("room-type");
+            var selectedOption = roomSelect.options[roomSelect.selectedIndex];
+            var pricePerNight = selectedOption ? parseInt(selectedOption.getAttribute("data-price")) || 0 : 0;
+
+            var nights = 1;
+            if (checkIn && checkOut) {
+                var inDate = new Date(checkIn);
+                var outDate = new Date(checkOut);
+                var diff = (outDate - inDate) / (1000 * 60 * 60 * 24);
+                nights = diff > 0 ? diff : 1;
+            }
+
+            var totalPrice = pricePerNight * nights;
+            document.getElementById("total-price").innerText = "Total Price: $" + totalPrice + " (" + nights + " night" + (nights !== 1 ? "s" : "") + " x $" + pricePerNight + "/night)";
+        }
+
+        function togglePaymentFields() {
+            var paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
+            var paymentDetails = document.getElementById("payment-details");
+            if (paymentMethod === "credit_card" || paymentMethod === "debit_card") {
+                paymentDetails.style.display = "block";
+            } else {
+                paymentDetails.style.display = "none";
+            }
+        }
+
+        function handleBooking(e) {
+            e.preventDefault();
+            var email = document.getElementById("email").value;
+            var name = document.getElementById("guest-name").value;
+            var roomType = document.getElementById("room-type").value;
+            var checkIn = document.getElementById("check-in").value;
+            var checkOut = document.getElementById("check-out").value;
+
+            if (!checkIn || !checkOut || new Date(checkOut) <= new Date(checkIn)) {
+                alert("Please select valid check-in and check-out dates. Check-out must be after check-in.");
+                return;
+            }
+
+            alert("Thank you, " + name + "! Your booking for a " + roomType + " room has been received.\nA confirmation email will be sent to: " + email);
+        }
+    </script>
+
+</body>
+</html>
